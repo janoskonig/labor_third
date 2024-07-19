@@ -13,6 +13,7 @@ import pandas as pd
 import numpy as np
 from scipy.optimize import curve_fit
 import mysql.connector
+from mysql.connector.pooling import MySQLConnectionPool
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -42,71 +43,57 @@ database = os.getenv("DB_NAME")
 if not all([host, port, user, password, database]):
     raise ValueError("Missing one or more environment variables")
 
-# MySQL database connection
-def create_db_connection():
-    return mysql.connector.connect(
-        host=host,
-        port=port,
-        user=user,
-        password=password,
-        database=database
-    )
+# Initialize the connection pool
+pool = MySQLConnectionPool(
+    pool_name="my_pool",
+    pool_size=10,  # Adjust size according to your application's requirement
+    host=os.getenv("DB_HOST"),
+    port=os.getenv("DB_PORT"),
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD"),
+    database=os.getenv("DB_NAME")
+)
 
-db = create_db_connection()
-
-def ping_db():
-    global db
-    while True:
-        time.sleep(600)  # Sleep for 10 minutes
-        try:
-            db.ping(reconnect=True, attempts=3, delay=5)
-        except mysql.connector.Error as err:
-            print(f"Error pinging MySQL: {err}")
-            db = create_db_connection()
-
-# Start the background thread to ping the database
-thread = threading.Thread(target=ping_db)
-thread.daemon = True
-thread.start()
-
-
+def get_db_connection():
+    return pool.get_connection()
 
 
 def get_db_cursor():
-    global db
-    try:
-        db.ping(reconnect=True, attempts=3, delay=5)
-    except mysql.connector.Error:
-        db = create_db_connection()
-    return db.cursor()
-
+    conn = get_db_connection()
+    return conn.cursor()
 
 # Save contraction to database
 def save_contraction_to_db(start_time, end_time, duration, severity):
+    conn = get_db_connection()
     try:
         print(f"Inserting data into DB: start={start_time}, end={end_time}, duration={duration}, severity={severity}")  # Debug
-        with get_db_cursor() as cursor:
+        with conn.cursor() as cursor:
             sql = "INSERT INTO contractions (start_time, end_time, duration, severity) VALUES (%s, %s, %s, %s)"
             values = (start_time, end_time, duration, severity)
             cursor.execute(sql, values)
-            db.commit()
+        conn.commit()
         print("Data inserted successfully")  # Debug
-    except Exception as e:
+    except mysql.connector.Error as e:
         print(f"Error inserting data: {e}")  # Debug
+    finally:
+        conn.close()
 
-cursor = get_db_cursor()
+
 # Fetch contractions from database
 def fetch_contractions_from_db():
     try:
-        global cursor
-        cursor.execute("SELECT * FROM contractions")
-        data = cursor.fetchall()
-        df = pd.DataFrame(data, columns=["id", "start_time", "end_time", "duration", "severity"])
-        print(f"Fetched data columns: {df.columns}")  # Debug
+        conn = get_db_connection()
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM contractions")
+            data = cursor.fetchall()
+            df = pd.DataFrame(data, columns=["id", "start_time", "end_time", "duration", "severity"])
+            print(f"Fetched data columns: {df.columns}")  # Debug
         return df
     except Exception as e:
         print(f"Error fetching data: {e}")  # Debug
         return pd.DataFrame()
+    finally:
+        conn.close()
     
 
 # Plotting function
