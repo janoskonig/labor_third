@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vajúdás tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Vajúdásvizsgáló</h1>
+    <button id="startButton" type="button">Start</button>
+    <button id="stopButton" type="button">Stop</button>
+    <form id="severityForm" style="display: none;">
+        <label for="severity">Összehúzódás ereje (1-10):</label>
+        <input type="number" id="severity" name="severity" min="1" max="10" required>
+        <button type="submit">Küldés és stop</button>
+    </form>
+
+    <h2>Kontrakciók ideje, erőssége:</h2>
+    {{ table|safe }}
+
+    <h2>Kontrakciók az idő előrehaladtával:</h2>
+    {% if img_str1 %}
+        <img src="data:image/png;base64,{{ img_str1 }}" alt="Rolling SD plot">
+        <img src="data:image/png;base64,{{ img_str2 }}" alt="Contraction plot">
+    {% else %}
+        <p>Nincs megmutatható.</p>
+    {% endif %}
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
