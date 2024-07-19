@@ -5,8 +5,9 @@ numpy
 matplotlib
 mysql-connector-python
 pytz
-dotenv
+python-dotenv
 datetime
 BytesIO
 base64
 threading
+scipy
