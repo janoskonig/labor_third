@@ -124,7 +124,10 @@ def analyze_contractions(data, window_size=5, exclude_fraction=1/4, future_pred_
     """
 
     # Remember the first start_time:
-    veryfirst_start_time = data['start_time'].iloc[0]
+    if data.empty:
+        return None, None, None, None
+    else:
+        veryfirst_start_time = data['start_time'].iloc[0]
     
     # Converting start_time to passed time in seconds
     data['start_time'] = (data['start_time'] - data['start_time'].min()).dt.total_seconds()
@@ -212,6 +215,8 @@ def analyze_contractions(data, window_size=5, exclude_fraction=1/4, future_pred_
 def index():
     # Usage
     data = fetch_contractions_from_db()
+    if data.empty:
+        return render_template('index.html', popt=None, img_str1=None, img_str2=None, childbirth_timepoint=None, table=None)
     # print(data)
     popt, chilbirth_timepoint, fig1, fig2 = analyze_contractions(data)
     img_str1 = plot_to_base64(fig1)
