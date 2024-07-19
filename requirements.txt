@@ -1,0 +1,12 @@
+pandas
+gunicorn
+flask
+numpy
+matplotlib
+mysql-connector-python
+pytz
+dotenv
+datetime
+BytesIO
+base64
+threading
