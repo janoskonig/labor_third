@@ -68,7 +68,7 @@ def save_contraction_to_db(start_time, end_time, duration, severity):
     try:
         print(f"Inserting data into DB: start={start_time}, end={end_time}, duration={duration}, severity={severity}")  # Debug
         with conn.cursor() as cursor:
-            sql = "INSERT INTO contractions (start_time, end_time, duration, severity) VALUES (%s, %s, %s, %s)"
+            sql = "INSERT INTO igazidata (start_time, end_time, duration, severity) VALUES (%s, %s, %s, %s)"
             values = (start_time, end_time, duration, severity)
             cursor.execute(sql, values)
         conn.commit()
@@ -84,7 +84,7 @@ def fetch_contractions_from_db():
     try:
         conn = get_db_connection()
         with conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM contractions")
+            cursor.execute("SELECT * FROM igazidata")
             data = cursor.fetchall()
             df = pd.DataFrame(data, columns=["id", "start_time", "end_time", "duration", "severity"])
             print(f"Fetched data columns: {df.columns}")  # Debug
