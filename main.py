@@ -102,6 +102,7 @@ def fetch_contractions_from_db():
         cursor.execute("SELECT * FROM contractions")
         data = cursor.fetchall()
         df = pd.DataFrame(data, columns=["id", "start_time", "end_time", "duration", "severity"])
+        print(f"Fetched data columns: {df.columns}")  # Debug
         return df
     except Exception as e:
         print(f"Error fetching data: {e}")  # Debug
