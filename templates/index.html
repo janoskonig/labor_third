@@ -8,6 +8,10 @@
 <body>
     <h1>Vajúdásvizsgáló</h1>
     <p>Nyugika, ez csak szimulált adatok alapján megy...</p>
+    <h2>Hogy használd?</h2>
+    <p>Indítsd el a stoppert a "Start" gombbal, majd nyomd meg a "Stop" gombot, amikor egy összehúzódást érzel. Az összehúzódás erősségét is add meg, ha tudod. A "Küldés és stop" gombbal küldd el az adatokat, és állítsd le a stoppert. Rögtön nem fog látszódni az eredmény, de ha frissíted az oldalt, látni fogod a táblázat alján.
+    <p>Ha már több adat bevitele megtörtént (minimum 10), akkor a "Kontrakciók az idő előrehaladtával" részben láthatod, hogy mikor várható a gyerek születése. Ez az új adatok fényében mindig egy kicsit változik.</p>
+    </p>
     <button id="startButton" type="button">Start</button>
     <button id="stopButton" type="button">Stop</button>
     <form id="severityForm" style="display: none;">
@@ -20,12 +24,18 @@
     {{ table|safe }}
 
     <h2>Kontrakciók az idő előrehaladtával:</h2>
+    <h3>Hogyan számolunk?</h3>
     {% if img_str1 %}
+        <p>Az öt legutolsó kontrakció standard deviációját (csúszóablak) ábrázoltam az idő függvényében. Az adatokra exponenciálisan csökkenő függvény illeszthető. Az függvény azon pontja, ahol a jósolt a standard deviáció 1 alá kerül (azaz a kontrakciók hosszúsága között <b>átlagosan</b> csak 1 másodperc az eltérés), oda jósoljuk a gyerek megszületését.</p>
         <img src="data:image/png;base64,{{ img_str1 }}" alt="Rolling SD plot">
+        <p>Az összehúzódásokat időtartamuk szerint ábrázolva az idő függvényében, kirajzolódhat egy tendencia: az összehúzódások egyre hosszabbak és egyre egyformábbak lesznek, azaz standard deviációjuk csökken. Ezt használtuk ki az előző ábrán végzett kalkuláción is. Az ott nyert "születés várható idejé"-t itt is jelöltem.</p>
         <img src="data:image/png;base64,{{ img_str2 }}" alt="Contraction plot">
     {% else %}
         <p>Nincs megmutatható.</p>
     {% endif %}
     <script src="{{ url_for('static', filename='app.js') }}"></script>
+
+    <p>A szülés várható ideje tehát: </p>
+    {{ childbirth_timepoint }}
 </body>
 </html>

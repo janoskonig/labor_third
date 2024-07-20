@@ -12,6 +12,7 @@ from io import BytesIO
 import pandas as pd
 import numpy as np
 from scipy.optimize import curve_fit
+from sklearn.metrics import r2_score
 import mysql.connector
 from mysql.connector.pooling import MySQLConnectionPool
 
@@ -151,15 +152,20 @@ def analyze_contractions(data, window_size=5, exclude_fraction=1/4, future_pred_
 
     # Fit the exponential decay function
     popt, pcov = curve_fit(exp_decay, filtered_std_time, filtered_rolling_std, p0=(1, 0.001, 0), maxfev=10000)
+    # Calculate fitted values
+    fitted_values = exp_decay(filtered_std_time, *popt)
 
+    # Calculate R-squared
+    r_squared = r2_score(filtered_rolling_std, fitted_values)
     # Predict rolling standard deviation
     rolling_std_pred = exp_decay(std_time, *popt)
 
     # Extend future predictions
     future_times = np.linspace(std_time.max() + 1, std_time.max() + future_pred_length, num=future_pred_length)
     future_rolling_std_pred = exp_decay(future_times, *popt)
-    # Find the timepoint where rolling_std becomes 0
-    childbirth_timepoint = future_times[np.argmin(np.abs(future_rolling_std_pred))]
+    # Find the timepoint where rolling_std becomes 1
+    childbirth_timepoint = future_times[np.argmin(np.abs(future_rolling_std_pred - 1))]
+    # childbirth_timepoint = future_times[np.argmin(np.abs(future_rolling_std_pred))]
 
     # Convert childbirth_timepoint to datetime
     childbirth_timepoint = pd.to_datetime(veryfirst_start_time + pd.to_timedelta(childbirth_timepoint, unit='s'))
@@ -170,9 +176,9 @@ def analyze_contractions(data, window_size=5, exclude_fraction=1/4, future_pred_
     std_time = pd.to_datetime(data['start_time'], unit='s')
     data["start_time"] = veryfirst_start_time + pd.to_timedelta(data["start_time"], unit='s')
     # Plot rolling standard deviation with exponential decay fit
-    fig1 = plt.figure(figsize=(14, 7))
+    fig1 = plt.figure(figsize=(10, 4))
     plt.plot(data["start_time"], rolling_std_filled, label='Csúszóátlag szórása', color='blue')
-    plt.plot(data["start_time"], rolling_std_pred, color='green', linewidth=2, label='Illesztett exponenciális görbe')
+    plt.plot(data["start_time"], rolling_std_pred, color='green', linewidth=2, label='Illesztett exponenciális görbe \n(R^2 = {:.2f})'.format(r_squared))
     plt.plot(future_times, future_rolling_std_pred, label='Előrejelzés', color='purple')
     plt.axvline(x=childbirth_timepoint, color='red', linestyle='--', label='Születés várható ideje')
     plt.xlabel('Időpont')
