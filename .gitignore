@@ -1,1 +1,5 @@
 .env
+/__pycache__
+test1.py
+simulated_contractions_with_datetime.csv
+simulated_contractions.csv

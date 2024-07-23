@@ -69,7 +69,7 @@ def save_contraction_to_db(start_time, end_time, duration, severity):
     try:
         print(f"Inserting data into DB: start={start_time}, end={end_time}, duration={duration}, severity={severity}")  # Debug
         with conn.cursor() as cursor:
-            sql = "INSERT INTO contractions (start_time, end_time, duration, severity) VALUES (%s, %s, %s, %s)"
+            sql = "INSERT INTO igazidata (start_time, end_time, duration, severity) VALUES (%s, %s, %s, %s)"
             values = (start_time, end_time, duration, severity)
             cursor.execute(sql, values)
         conn.commit()
@@ -85,7 +85,7 @@ def fetch_contractions_from_db():
     try:
         conn = get_db_connection()
         with conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM contractions")
+            cursor.execute("SELECT * FROM igazidata")
             data = cursor.fetchall()
             df = pd.DataFrame(data, columns=["id", "start_time", "end_time", "duration", "severity"])
             print(f"Fetched data columns: {df.columns}")  # Debug
@@ -124,6 +124,9 @@ def analyze_contractions(data, window_size=5, exclude_fraction=1/4, future_pred_
         childbirth_timepoint (float): The predicted time point of childbirth.
     """
 
+    # Ensure data has no infinite or NaN values in relevant columns
+    data['duration'].replace([np.inf, -np.inf], np.nan, inplace=True)
+    data.dropna(subset=['duration'], inplace=True)
     # Remember the first start_time:
     if data.empty:
         return None, None, None, None
@@ -149,6 +152,12 @@ def analyze_contractions(data, window_size=5, exclude_fraction=1/4, future_pred_
     # Exponential decay function
     def exp_decay(x, a, b, c):
         return a * np.exp(-b * x) + c
+    # Ensure all data is finite
+    if not np.isfinite(filtered_std_time).all() or not np.isfinite(filtered_rolling_std).all():
+        print("Data contains non-finite values. Cleaning data...")
+        mask = np.isfinite(filtered_std_time) & np.isfinite(filtered_rolling_std)
+        filtered_std_time = filtered_std_time[mask]
+        filtered_rolling_std = filtered_rolling_std[mask]
 
     # Fit the exponential decay function
     popt, pcov = curve_fit(exp_decay, filtered_std_time, filtered_rolling_std, p0=(1, 0.001, 0), maxfev=10000)
