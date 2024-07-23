@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vajúdás tracker</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <h1>Vajúdásvizsgáló</h1>
     <!-- <p>Nyugika, ez csak szimulált adatok alapján megy...</p> -->
-    <p>Ez már az <b>igazi adatok</b> alapján megy! A legelső 15 sor nem igazi, az csak jobb híján az error handling miatt kell.</p>
+    <p>Ez már az <b>igazi adatok</b> alapján megy! Csak 15 sor után kezdenek a grafikák működni!</p>
 
     <h2>Hogy használd?</h2>
     <p>Indítsd el a stoppert a "Start" gombbal, majd nyomd meg a "Stop" gombot, amikor egy összehúzódást érzel. Az összehúzódás erősségét is add meg, ha tudod. A "Küldés és stop" gombbal küldd el az adatokat, és állítsd le a stoppert. Rögtön nem fog látszódni az eredmény, de ha frissíted az oldalt, látni fogod a táblázat alján.

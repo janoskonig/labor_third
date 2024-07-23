@@ -124,9 +124,6 @@ def analyze_contractions(data, window_size=5, exclude_fraction=1/4, future_pred_
         childbirth_timepoint (float): The predicted time point of childbirth.
     """
 
-    # Ensure data has no infinite or NaN values in relevant columns
-    data['duration'].replace([np.inf, -np.inf], np.nan, inplace=True)
-    data.dropna(subset=['duration'], inplace=True)
     # Remember the first start_time:
     if data.empty:
         return None, None, None, None
@@ -152,15 +149,9 @@ def analyze_contractions(data, window_size=5, exclude_fraction=1/4, future_pred_
     # Exponential decay function
     def exp_decay(x, a, b, c):
         return a * np.exp(-b * x) + c
-    # Ensure all data is finite
-    if not np.isfinite(filtered_std_time).all() or not np.isfinite(filtered_rolling_std).all():
-        print("Data contains non-finite values. Cleaning data...")
-        mask = np.isfinite(filtered_std_time) & np.isfinite(filtered_rolling_std)
-        filtered_std_time = filtered_std_time[mask]
-        filtered_rolling_std = filtered_rolling_std[mask]
 
     # Fit the exponential decay function
-    popt, pcov = curve_fit(exp_decay, filtered_std_time, filtered_rolling_std, p0=(1, 0.001, 0), maxfev=10000)
+    popt, pcov = curve_fit(exp_decay, filtered_std_time, filtered_rolling_std, p0=(1, 0.001, 0), maxfev=20000)
     # Calculate fitted values
     fitted_values = exp_decay(filtered_std_time, *popt)
 
@@ -230,13 +221,13 @@ def analyze_contractions(data, window_size=5, exclude_fraction=1/4, future_pred_
 def index():
     # Usage
     data = fetch_contractions_from_db()
-    if data.empty:
-        return render_template('index.html', popt=None, img_str1=None, img_str2=None, childbirth_timepoint=None, table=None)
+    if data.empty or len(data) < 15:
+        return render_template('index.html', popt=None, img_str1=None, img_str2=None, childbirth_timepoint=None, table=data.to_html())
     # print(data)
-    popt, chilbirth_timepoint, fig1, fig2 = analyze_contractions(data)
+    popt, childbirth_timepoint, fig1, fig2 = analyze_contractions(data)
     img_str1 = plot_to_base64(fig1)
     img_str2 = plot_to_base64(fig2)
-    return render_template('index.html', popt=popt, img_str1=img_str1, img_str2=img_str2, childbirth_timepoint=chilbirth_timepoint, table=data.to_html())
+    return render_template('index.html', popt=popt, img_str1=img_str1, img_str2=img_str2, childbirth_timepoint=childbirth_timepoint, table=data.to_html())
 
 
 start_time = None
