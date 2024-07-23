@@ -34,11 +34,15 @@
         <p>Az összehúzódásokat időtartamuk szerint ábrázolva az idő függvényében, kirajzolódhat egy tendencia: az összehúzódások egyre hosszabbak és egyre egyformábbak lesznek, azaz standard deviációjuk csökken. Ezt használtuk ki az előző ábrán végzett kalkuláción is. Az ott nyert "születés várható idejé"-t itt is jelöltem.</p>
         <img src="data:image/png;base64,{{ img_str2 }}" alt="Contraction plot">
     {% else %}
-        <p>Nincs megmutatható.</p>
+        <p>Amint meglesz a 15 db kontrakció, láthatod a grafikonokat is!</p>
     {% endif %}
     <script src="{{ url_for('static', filename='app.js') }}"></script>
 
     <p>A szülés várható ideje tehát: </p>
-    {{ childbirth_timepoint }}
+    {% if childbirth_timepoint %}
+        {{ childbirth_timepoint }}
+    {% else %}
+        <p>Egyelőre nem tudjuk kiszámolni...</p>
+    {% endif %}
 </body>
 </html>
