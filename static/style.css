@@ -1,3 +1,49 @@
+/* General styles for all buttons, setting defaults */
+button {
+    padding: 10px 20px; /* Adjust padding as needed */
+    font-size: 16px; /* Base font size for readability */
+    margin: 10px 0; /* Add some margin for spacing */
+    box-sizing: border-box; /* Include padding and border in the button's total width and height */
+}
+
+/* Specific styles for circular buttons */
+#startButton, #stopButton {
+    width: 80px; /* Set a fixed width for a circle */
+    height: 80px; /* Set height equal to width for perfect circle */
+    border-radius: 50%; /* High border-radius to make it circular */
+    line-height: 80px; /* Center text vertically */
+    text-align: center; /* Center text horizontally */
+}
+
+/* Styles specific to mobile devices for circular buttons */
+@media (max-width: 768px) {
+    #startButton, #stopButton {
+        width: 100px; /* Larger size for easier interaction on small screens */
+        height: 100px; /* Maintain the circle ratio */
+        font-size: 18px; /* Larger font size for better visibility */
+        line-height: 100px; /* Adjust line height to center text vertically */
+    }
+}
+
+/* Styles for the rectangular "Küldés és stop" button */
+button[type="submit"] {
+    width: auto; /* Default width to contain text plus padding */
+    height: auto; /* Height to fit content and padding */
+    border-radius: 4px; /* Slightly rounded corners for aesthetic */
+    padding: 10px 20px; /* Comfortable padding for clicking */
+}
+
+/* Optionally, specific mobile adjustments for the rectangular button */
+@media (max-width: 768px) {
+    button[type="submit"] {
+        padding: 12px 24px; /* Slightly larger padding for easier interaction */
+        font-size: 18px; /* Larger font size for readability on small devices */
+    }
+}
+
+
+/* Additional styling for the form and other elements can be included here */
+
 body {
     font-family: Arial, sans-serif;
     margin: 40px;
